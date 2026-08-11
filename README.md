@@ -16,9 +16,14 @@ SCULPT is an independent project and is not affiliated with or endorsed by Merma
 - Automatic directed-graph layout through a replaceable Dagre adapter
 - Manual node dragging and exact diagram-space X/Y positioning
 - Node position locking and keyboard nudging
+- Multi-node modifier and marquee selection with group dragging/nudging
+- Exact width and height editing
+- Six alignment commands, equal-gap distribution, and match-size tools
 - Configurable visual grid and snap-to-grid
 - Manual layout metadata stored separately from source
 - Stable edge identities plus anchor, waypoint, and orthogonal-routing foundations
+- Selectable edges with anchor/routing controls and draggable manual waypoints
+- View-local undo/redo with transaction-grouped drag history
 - Editor, preview, split, inspector, and presentation views
 - Same-browser multi-window workspace synchronization
 - Local IndexedDB workspace persistence

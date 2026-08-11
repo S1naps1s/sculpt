@@ -12,10 +12,16 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Avoid deprecated TypeScript options and keep TypeScript 7 compatibility in mind.
 - Treat source and layout metadata as untrusted. Validate finite numeric geometry before layout or rendering.
 - Stable node/edge identities—not DOM positions or array indexes—key persistent geometry.
+- Selection is view-local and must never be stored in or broadcast with a Workspace.
+- Precision geometry operations belong in pure, browser-independent modules and require focused unit tests.
+- Editor overlays and hit targets must remain separate from exported SVG.
+- Drag and waypoint gestures produce one undo transaction, not one entry per pointer event.
+- Locked objects never move implicitly; position locking does not imply size locking.
+- DOM/screen coordinates are not diagram-space coordinates; transform through the SVG coordinate system.
+- Preserve deterministic rendering and support negative diagram-space coordinates in bounds.
 - Add tests when extending syntax, geometry resolution, persistence, synchronization, or rendering.
 - Do not copy Mermaid branding or assets.
 
 ## Verification
 
 Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. Visual changes also require `npm run test:visual` when Playwright Chromium is installed.
-
