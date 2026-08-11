@@ -23,6 +23,8 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Resize gestures preserve center-coordinate semantics and produce one precision-history transaction.
 - Smart-guide tolerance is screen-space; group snapping applies one common translation.
 - Grid and object snapping compete by smallest adjustment instead of being applied sequentially.
+- Resize snapping considers only the actively moving handle edges; locked selected nodes remain stationary snap references.
+- Direct waypoint insertion requires an actual edge hit and must respect the edge's active routing mode.
 - Editor guides, handles, and selection bounds never enter exported SVG.
 - Viewport commands, including Fit Selection, never modify Workspace geometry.
 - In editable Canvas views, generated SVG is visual-only; overlays own editing, and native browser selection or drag behavior must not participate in gestures.
