@@ -46,7 +46,7 @@ Source and metadata are untrusted. Labels are XML-escaped, identifiers normalize
 
 ## Precision selection and editor overlays
 
-Phase 3 selection is a view-local discriminated union: either an ordered unique node set with a primary node, one edge with an optional waypoint, or no selection. Normal node click replaces selection; Ctrl/Cmd-click toggles membership while retaining a valid primary. Edge selection clears nodes. Selection is never stored in Workspace, persisted, or broadcast.
+Phase 3 selection is a view-local discriminated union: either an ordered unique node set with a primary node, one edge with an optional waypoint, or no selection. `createNodeSelection` and `toggleNodeSelection` enforce that the primary is always contained in the unique node set. Normal node click replaces selection; Ctrl/Cmd-click toggles membership, preserves a surviving primary, and otherwise selects the first remaining node as the deterministic replacement. Edge selection clears nodes. Selection is never stored in Workspace, persisted, or broadcast.
 
 Marquee selection uses node bounding-box intersection in diagram space. A plain marquee replaces selection and a Ctrl/Cmd marquee adds to it. Empty-canvas primary-button drag creates a marquee; Alt-drag or middle-button drag pans. Node/edge hit regions, selection halos, marquee rectangles, and waypoint handles live in a React-owned SVG overlay aligned to the renderer viewBox. They are absent from `RenderResult.svg` and exported diagrams.
 
@@ -61,6 +61,8 @@ Group translation applies one common delta to movable nodes. When snapping is en
 ## Edge editing
 
 The interaction overlay provides non-visible wide edge hit strokes without changing exported appearance. The inspector edits anchors, auto/straight/orthogonal/manual routing, and routing locks. Adding a waypoint switches to manual routing. Selected waypoints are draggable and Delete removes them; locked routes reject changes. Orthogonal routes without explicit waypoints resolve through deterministic elbows. Orthogonal waypoint dragging chooses a valid corner from adjacent route segments, preventing diagonal segments.
+
+Stored edge geometry is distinct from active routing interpretation. Auto uses the layout engine route, or a direct anchor-aware route when manual endpoint geometry requires reconnection. Straight always connects resolved anchors directly. Manual consumes stored waypoints. Orthogonal consumes only valid orthogonal waypoints or generates a deterministic elbow. Inactive waypoints are preserved when switching modes but never affect Auto or Straight rendering.
 
 ## Undo and synchronization
 

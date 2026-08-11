@@ -13,7 +13,7 @@ function anchorPoint(node: PositionedNode, anchor: Anchor | undefined, toward: P
   const dx = toward.x - node.x; const dy = toward.y - node.y; if (Math.abs(dx / node.width) > Math.abs(dy / node.height)) return { x: node.x + Math.sign(dx || 1) * node.width / 2, y: node.y }; return { x: node.x, y: node.y + Math.sign(dy || 1) * node.height / 2 };
 }
 function manualRoute(edge: EdgeGeometry, source: PositionedNode, target: PositionedNode): Point[] {
-  const waypoints = edge.waypoints ?? []; if (!waypoints.every(finitePoint)) throw new DiagramError({ code: 'LAYOUT_INVALID_WAYPOINT', message: 'Edge waypoints must contain finite coordinates.', stage: 'layout', severity: 'error' });
+  const waypoints = edge.routing === 'manual' || edge.routing === 'orthogonal' ? edge.waypoints ?? [] : []; if (!waypoints.every(finitePoint)) throw new DiagramError({ code: 'LAYOUT_INVALID_WAYPOINT', message: 'Edge waypoints must contain finite coordinates.', stage: 'layout', severity: 'error' });
   const firstTarget = waypoints[0] ?? target; const lastSource = waypoints.at(-1) ?? source; const start = anchorPoint(source, edge.sourceAnchor, firstTarget); const end = anchorPoint(target, edge.targetAnchor, lastSource); const route = edge.routing === 'orthogonal' && waypoints.length === 0 ? [start, { x: (start.x + end.x) / 2, y: start.y }, { x: (start.x + end.x) / 2, y: end.y }, end] : [start, ...waypoints, end];
   if (edge.routing === 'orthogonal' && route.some((point, index) => index > 0 && point.x !== route[index - 1]?.x && point.y !== route[index - 1]?.y)) throw new DiagramError({ code: 'LAYOUT_NON_ORTHOGONAL', message: 'Orthogonal routes may only contain horizontal or vertical segments.', stage: 'layout', severity: 'error' }); return route;
 }

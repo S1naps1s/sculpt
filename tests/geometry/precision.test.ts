@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addEdgeWaypoint, alignNodes, createWorkspace, deleteEdgeWaypoint, distributeNodes, matchNodeSize, moveEdgeWaypoint, setEdgeAnchor, translateNodes, updateEdgeGeometry, type NodeFrame } from '@sculpt/workspace';
+import { addEdgeWaypoint, alignNodes, createWorkspace, deleteEdgeWaypoint, distributeNodes, matchNodeSize, moveEdgeWaypoint, setEdgeAnchor, setEdgeRouting, translateNodes, updateEdgeGeometry, type NodeFrame } from '@sculpt/workspace';
 const frames: NodeFrame[] = [
   { id: 'a', x: 50, y: 50, width: 20, height: 40, locked: false },
   { id: 'b', x: 130, y: 100, width: 40, height: 20, locked: false },
@@ -17,5 +17,5 @@ describe('precision geometry', () => {
 });
 describe('edge precision geometry', () => {
   it('updates anchors and waypoint lifecycle', () => { let workspace = createWorkspace('edge'); workspace = setEdgeAnchor(workspace, 'edge-1', 'source', 'east'); workspace = addEdgeWaypoint(workspace, 'edge-1', { x: 10, y: 20 }); workspace = moveEdgeWaypoint(workspace, 'edge-1', 0, { x: 30, y: 40 }); expect(workspace.layout.edges['edge-1']).toMatchObject({ sourceAnchor: 'east', routing: 'manual', waypoints: [{ x: 30, y: 40 }] }); workspace = deleteEdgeWaypoint(workspace, 'edge-1', 0); expect(workspace.layout.edges['edge-1']?.waypoints).toEqual([]); });
-  it('rejects invalid waypoints and respects routing locks', () => { const workspace = createWorkspace('locked-edge'); workspace.layout.edges.edge = { routing: 'manual', routingLocked: true, waypoints: [{ x: 1, y: 2 }] }; expect(moveEdgeWaypoint(workspace, 'edge', 0, { x: 3, y: 4 })).toBe(workspace); expect(addEdgeWaypoint(workspace, 'edge', { x: Number.NaN, y: 0 })).toBe(workspace); expect(updateEdgeGeometry(workspace, 'edge', { sourceAnchor: 'west' })).toBe(workspace); });
+  it('rejects invalid waypoints and respects routing locks', () => { const workspace = createWorkspace('locked-edge'); workspace.layout.edges.edge = { routing: 'manual', routingLocked: true, waypoints: [{ x: 1, y: 2 }] }; expect(moveEdgeWaypoint(workspace, 'edge', 0, { x: 3, y: 4 })).toBe(workspace); expect(addEdgeWaypoint(workspace, 'edge', { x: Number.NaN, y: 0 })).toBe(workspace); expect(updateEdgeGeometry(workspace, 'edge', { sourceAnchor: 'west' })).toBe(workspace); expect(setEdgeRouting(workspace, 'edge', 'straight')).toBe(workspace); });
 });
