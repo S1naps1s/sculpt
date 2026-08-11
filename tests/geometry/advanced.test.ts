@@ -1,0 +1,24 @@
+import { describe, expect, it } from 'vitest';
+import { applyNodeResize, boundsFromPoints, calculateViewportTransform, createWorkspace, insertEdgeWaypoint, nearestPointOnSegment, nearestRouteSegment, nodeBounds, resizeFromHandle, selectionBounds, snapBounds, type ResizeHandle } from '@sculpt/workspace';
+const frame = { id: 'a', x: 100, y: 100, width: 80, height: 60, locked: false };
+describe('direct resize geometry', () => {
+  it.each<[ResizeHandle, number, number, object]>([['e', 20, 0, { x: 110, width: 100, y: 100, height: 60 }], ['w', -20, 0, { x: 90, width: 100 }], ['n', 0, -20, { y: 90, height: 80 }], ['s', 0, 20, { y: 110, height: 80 }], ['ne', 20, -20, { x: 110, y: 90, width: 100, height: 80 }], ['se', 20, 20, { x: 110, y: 110, width: 100, height: 80 }], ['sw', -20, 20, { x: 90, y: 110, width: 100, height: 80 }], ['nw', -20, -20, { x: 90, y: 90, width: 100, height: 80 }]])('resizes %s around the opposite edge', (handle, dx, dy, expected) => expect(resizeFromHandle(frame, handle, dx, dy)).toMatchObject(expected));
+  it('clamps at useful minimums without flipping', () => expect(resizeFromHandle(frame, 'w', 500, 0)).toEqual({ x: 120, y: 100, width: 40, height: 60 }));
+  it('rejects invalid geometry and applies complete manual metadata', () => { expect(resizeFromHandle(frame, 'e', Number.NaN, 0)).toBeUndefined(); const workspace = createWorkspace('resize'); const result = applyNodeResize(workspace, 'a', { x: 2, y: 3, width: 40, height: 30 }); expect(result.layout.nodes.a).toMatchObject({ x: 2, y: 3, width: 40, height: 30, positioning: 'manual', sizing: 'manual' }); expect(applyNodeResize(workspace, 'a', { x: 0, y: 0, width: Infinity, height: 2 })).toBe(workspace); });
+});
+describe('selection bounds', () => {
+  it('handles one, several differently-sized, and negative nodes', () => { expect(nodeBounds(frame)).toMatchObject({ left: 60, right: 140, top: 70, bottom: 130 }); expect(selectionBounds([frame, { ...frame, x: -50, y: -40, width: 20, height: 40 }])).toEqual({ left: -60, right: 140, top: -60, bottom: 130, x: 40, y: 35, width: 200, height: 190 }); });
+});
+describe('object snapping', () => {
+  const moving = nodeBounds({ x: 106, y: 100, width: 40, height: 40 })!; const target = nodeBounds({ x: 150, y: 100, width: 40, height: 40 })!;
+  it('snaps edges and centers at screen-space tolerance', () => { expect(snapBounds(moving, [{ id: 'b', bounds: target }], 1)).toMatchObject({ dx: 4, dy: 0 }); expect(snapBounds(moving, [{ id: 'b', bounds: target }], 8).dx).toBe(0); });
+  it('uses deterministic stable-ID ties and no candidate outside tolerance', () => { const result = snapBounds(moving, [{ id: 'z', bounds: target }, { id: 'a', bounds: target }], 1); expect(result.guides[0]?.targetId).toBe('a'); expect(snapBounds(nodeBounds({ x: 0, y: 0, width: 10, height: 10 })!, [{ id: 'b', bounds: target }], 1).guides).toEqual([]); });
+  it('chooses the closest adjustment between grid and objects', () => { expect(snapBounds(moving, [{ id: 'b', bounds: target }], 1, 6, { enabled: true, spacing: 10 }).dx).toBe(4); const gridWins = snapBounds(nodeBounds({ x: 91, y: 100, width: 40, height: 40 })!, [{ id: 'b', bounds: target }], 1, 10, { enabled: true, spacing: 10 }); expect(gridWins.dx).toBe(-1); });
+});
+describe('route projection and insertion', () => {
+  it('projects to the nearest segment with stable ordering', () => { expect(nearestPointOnSegment({ x: 4, y: 3 }, { x: 0, y: 0 }, { x: 10, y: 0 })).toEqual({ point: { x: 4, y: 0 }, distance: 3 }); expect(nearestRouteSegment({ x: 9, y: 6 }, [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }])).toMatchObject({ point: { x: 10, y: 6 }, segmentIndex: 1 }); });
+  it('inserts in route order and respects locks', () => { const workspace = createWorkspace('edge'); workspace.layout.edges.e = { routing: 'manual', waypoints: [{ x: 10, y: 0 }] }; const result = insertEdgeWaypoint(workspace, 'e', { x: 5, y: 0 }, 0); expect(result.layout.edges.e?.waypoints).toEqual([{ x: 5, y: 0 }, { x: 10, y: 0 }]); workspace.layout.edges.e.routingLocked = true; expect(insertEdgeWaypoint(workspace, 'e', { x: 5, y: 0 }, 0)).toBe(workspace); });
+});
+describe('selection viewport framing', () => {
+  it('centers off-center and negative targets and clamps zoom', () => { const diagram = { left: -2000, right: 2000, top: -1000, bottom: 1000, x: 0, y: 0, width: 4000, height: 2000 }; expect(calculateViewportTransform({ width: 1000, height: 800 }, diagram, { ...diagram, left: 1650, right: 1750, top: -50, bottom: 50, x: 1700, y: 0, width: 100, height: 100 })).toMatchObject({ scale: 1.5, panX: -2550, panY: 0 }); const points = boundsFromPoints([{ x: -20, y: -10 }, { x: 20, y: 30 }])!; expect(calculateViewportTransform({ width: 20, height: 20 }, points, points).scale).toBe(.2); });
+});
