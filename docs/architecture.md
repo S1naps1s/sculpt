@@ -44,3 +44,38 @@ The resolver converts anchors to node-boundary points. Explicit waypoints are pr
 
 Source and metadata are untrusted. Labels are XML-escaped, identifiers normalized, markup is never evaluated, and all coordinates, sizes, spacing, anchors, and waypoints are normalized or rejected before SVG interpolation. Existing diagrams without metadata resolve as auto layout and retain Phase 1 behavior.
 
+## Precision selection and editor overlays
+
+Phase 3 selection is a view-local discriminated union: either an ordered unique node set with a primary node, one edge with an optional waypoint, or no selection. `createNodeSelection` and `toggleNodeSelection` enforce that the primary is always contained in the unique node set. Normal node click replaces selection; Ctrl/Cmd-click toggles membership, preserves a surviving primary, and otherwise selects the first remaining node as the deterministic replacement. Edge selection clears nodes. Selection is never stored in Workspace, persisted, or broadcast.
+
+Marquee selection uses node bounding-box intersection in diagram space. A plain marquee replaces selection and a Ctrl/Cmd marquee adds to it. Empty-canvas primary-button drag creates a marquee; Alt-drag or middle-button drag pans. Node/edge hit regions, selection halos, marquee rectangles, and waypoint handles live in a React-owned SVG overlay aligned to the renderer viewBox. They are absent from `RenderResult.svg` and exported diagrams.
+
+## Precision geometry operations
+
+`@sculpt/workspace/precision` contains pure transformations for group translation, sizing, alignment, distribution, match-size, anchors, and waypoints. React supplies resolved node frames; operations produce a new Workspace.
+
+Alignment uses the complete selection bounds: left/top use the minimum edge, right/bottom the maximum edge, and center operations the selection bounds center. Locked nodes participate in reference bounds but do not move. Distribution sorts by center then stable ID, preserves the outer boundaries, and calculates equal bounding-box gaps. Locked members remain fixed; Phase 3 does not solve constrained redistribution around multiple locked intermediate nodes. Match Width/Height uses the primary node and position locks do not restrict sizing.
+
+Group translation applies one common delta to movable nodes. When snapping is enabled, the primary node determines the snapped group delta so relative spacing is preserved. Resizing sets `sizing: manual` without forcing auto-positioned nodes into manual positioning.
+
+Automatic sizing gives ordinary rectangle and rounded nodes a 120×64 minimum, expands width with label length, and gives database, diamond, stadium, and circle shapes modest additional room. Explicit positive manual width and height always override these defaults.
+
+## Edge editing
+
+The interaction overlay provides non-visible wide edge hit strokes without changing exported appearance. The inspector edits anchors, auto/straight/orthogonal/manual routing, and routing locks. Adding a waypoint switches to manual routing. Selected waypoints are draggable and Delete removes them; locked routes reject changes. Orthogonal routes without explicit waypoints resolve through deterministic elbows. Orthogonal waypoint dragging chooses a valid corner from adjacent route segments, preventing diagonal segments.
+
+Stored edge geometry is distinct from active routing interpretation. Auto uses the layout engine route, or a direct anchor-aware route when manual endpoint geometry requires reconnection. Straight always connects resolved anchors directly. Manual consumes stored waypoints. Orthogonal consumes only valid orthogonal waypoints or generates a deterministic elbow. Inactive waypoints are preserved when switching modes but never affect Auto or Straight rendering.
+
+## Undo and synchronization
+
+Each editing View owns a bounded `WorkspaceHistory`; history is not synchronized. History entries project only layout mode plus node and edge geometry. Undo and redo apply that projection to the current Workspace through the normal `WorkspaceController.update` path, so later source, name, theme, grid configuration, timestamps, and unrelated future fields are preserved. Remote workspace events clear local history to prevent stale redo from overwriting newer shared state.
+
+Pointer-down begins a history transaction. Node, group, waypoint, and marquee gestures capture the SVG screen-to-diagram inverse transform once and retain that coordinate frame even when live geometry changes the viewBox. Pointer up, pointer cancellation, and lost pointer capture use one idempotent finalizer: a changed drag commits one undoable entry, while a no-op gesture is ignored. Numeric, alignment, distribution, sizing, anchor, routing, and waypoint commands create ordinary history entries. Source text keeps native textarea undo behavior; workspace shortcuts ignore text inputs.
+
+## Canvas bounds
+
+Resolved layout contains an explicit `x`, `y`, `width`, and `height`. Bounds include full node extents, routed edge points, waypoints, and padding, including negative coordinates. SVG uses these values directly as its viewBox rather than clipping geometry to a zero origin.
+
+The diagram surface is sized from those bounds, so 100% means approximately one diagram-space unit per CSS pixel. The generated SVG and interaction overlay fill the same surface and receive one view-local pan/zoom transform. Views initially use Fit mode, which centers a padded diagram and recalculates after canvas or diagram-size changes. Manual zoom, pan, drag, or the distinct 100% command exits Fit mode. Zoom is consistently clamped from 20% through 800%; viewport state is never persisted or synchronized.
+
+Route positions use polyline arc-length interpolation, including duplicate and zero-length segments. Rerouted edge labels and newly inserted waypoints use the halfway traveled distance, placing straight-edge waypoints in the interior and handling unequal multi-segment routes correctly.
