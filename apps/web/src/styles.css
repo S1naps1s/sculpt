@@ -199,6 +199,18 @@ select:disabled {
 .canvas:focus-visible {
   box-shadow: inset 0 0 0 2px var(--accent);
 }
+.canvas.editable {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.canvas.editable .diagram-output,
+.canvas.editable .diagram-output * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.canvas.editable .diagram-output {
+  pointer-events: none;
+}
 .diagram {
   position: absolute;
   left: 50%;

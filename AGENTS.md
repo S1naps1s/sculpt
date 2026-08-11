@@ -25,6 +25,7 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Grid and object snapping compete by smallest adjustment instead of being applied sequentially.
 - Editor guides, handles, and selection bounds never enter exported SVG.
 - Viewport commands, including Fit Selection, never modify Workspace geometry.
+- In editable Canvas views, generated SVG is visual-only; overlays own editing, and native browser selection or drag behavior must not participate in gestures.
 - Locked objects never move implicitly; position locking does not imply size locking.
 - DOM/screen coordinates are not diagram-space coordinates; transform through the SVG coordinate system.
 - Preserve deterministic rendering and support negative diagram-space coordinates in bounds.
