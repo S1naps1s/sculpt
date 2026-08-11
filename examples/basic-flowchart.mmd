@@ -1,0 +1,5 @@
+flowchart LR
+  idea([Idea]) --> build[Build]
+  build ==> review{Ready?}
+  review -.->|revise| build
+  review --> launch((Launch))

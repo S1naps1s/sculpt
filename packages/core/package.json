@@ -1,0 +1,1 @@
+{"name":"@sculpt/core","version":"0.2.0","description":"Framework-independent parsing and rendering API for SCULPT.","license":"MIT","type":"module","exports":"./src/index.ts","dependencies":{"@sculpt/ast":"*","@sculpt/flowchart":"*","@sculpt/layout":"*","@sculpt/parser":"*","@sculpt/renderer-svg":"*","@sculpt/themes":"*","@sculpt/workspace":"*"}}

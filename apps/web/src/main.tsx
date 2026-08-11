@@ -1,0 +1,22 @@
+import { StrictMode, useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { render, validate, type Diagnostic } from '@sculpt/core';
+import { moveNode, type Selection, type ViewType } from '@sculpt/workspace';
+import { DiagramCanvas } from './components/DiagramCanvas';
+import { Inspector } from './components/Inspector';
+import { useWorkspace } from './workspace/useWorkspace';
+import './styles.css';
+function App() {
+  const { workspace, controller, viewType } = useWorkspace(); const [svg, setSvg] = useState(''); const [diagnostic, setDiagnostic] = useState<Diagnostic>(); const [selection, setSelection] = useState<Selection>();
+  useEffect(() => { if (!workspace) return; const timer = setTimeout(() => { const result = validate(workspace.source); if (!result.valid) { setDiagnostic(result.diagnostics[0]); return; } try { setSvg(render('preview', workspace.source, { theme: workspace.theme, metadata: workspace.layout }).svg); setDiagnostic(undefined); } catch (error) { setDiagnostic({ code: 'RENDER', message: error instanceof Error ? error.message : 'Unable to render this diagram.', stage: 'render', severity: 'error' }); } }, 120); return () => clearTimeout(timer); }, [workspace]);
+  if (!workspace) return <main className="loading">Loading SCULPT workspace…</main>;
+  const update = (recipe: Parameters<typeof controller.update>[0]) => controller.update(recipe); const hasEditor = viewType === 'editor' || viewType === 'split'; const hasCanvas = viewType !== 'editor'; const hasInspector = viewType === 'inspector' || viewType === 'split'; const chrome = viewType !== 'presentation';
+  const openView = (type: ViewType) => window.open(`/workspace/${encodeURIComponent(workspace.id)}?view=${type}`, '_blank', 'noopener');
+  const changeNode = (id: string, x: number, y: number) => update((current) => moveNode(current, id, x, y));
+  return <main className={`app ${workspace.theme === 'dark' ? 'dark' : ''} view-${viewType}`}>{chrome && <header><div className="brand"><span className="mark">S</span><div><strong>SCULPT</strong><small>Write the structure. Sculpt the diagram.</small></div></div><nav><select aria-label="Open view" defaultValue="" onChange={(event) => { openView(event.target.value as ViewType); event.target.value = ''; }}><option value="" disabled>Open View…</option>{(['editor','preview','split','inspector','presentation'] as const).map((type) => <option key={type} value={type}>{type[0]?.toUpperCase()}{type.slice(1)}</option>)}</select><button onClick={() => update((current) => ({ ...current, theme: current.theme === 'dark' ? 'light' : 'dark' }))}>{workspace.theme === 'dark' ? 'Light' : 'Dark'} mode</button></nav></header>}
+    <section className={`workspace-shell ${!hasEditor ? 'no-editor' : ''} ${!hasInspector ? 'no-inspector' : ''}`}>{hasEditor && <article className="panel editor"><div className="panel-title"><span>Source</span><button onClick={() => void navigator.clipboard.writeText(workspace.source)}>Copy</button></div><textarea aria-label="Diagram source" spellCheck={false} value={workspace.source} onChange={(event) => update((current) => ({ ...current, source: event.target.value }))}/>{diagnostic && <div className="error"><strong>{diagnostic.code}</strong> {diagnostic.message}{diagnostic.range && <span>Line {diagnostic.range.start.line}, column {diagnostic.range.start.column}</span>}</div>}</article>}
+      {hasCanvas && <article className="panel preview"><div className="panel-title"><span>{viewType === 'presentation' ? workspace.name : 'Canvas'}</span><span className="mode">{workspace.layout.mode}</span></div><DiagramCanvas svg={svg} workspace={workspace} editable={viewType === 'split' || viewType === 'inspector'} selection={selection} onSelection={setSelection} onMove={changeNode}/></article>}
+      {hasInspector && <Inspector workspace={workspace} selection={selection} onGeometry={changeNode} onLock={(id, locked) => update((current) => ({ ...current, layout: { ...current.layout, nodes: { ...current.layout.nodes, [id]: { ...current.layout.nodes[id], positionLocked: locked } } } }))} onGrid={(grid) => update((current) => ({ ...current, layout: { ...current.layout, grid: { ...current.layout.grid, ...grid } } }))}/>}</section>
+    {chrome && <footer><span className={diagnostic ? 'bad' : 'good'}>{diagnostic ? 'Syntax error' : `Workspace r${workspace.revision}`}</span><span>Local IndexedDB · multi-window sync · SVG output</span></footer>}</main>;
+}
+createRoot(document.getElementById('root')!).render(<StrictMode><App/></StrictMode>);

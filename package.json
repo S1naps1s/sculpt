@@ -1,0 +1,34 @@
+{
+  "name": "sculpt",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Browser-first text-to-diagram engine and precision visual editor.",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w @sculpt/web",
+    "build": "npm run build -w @sculpt/web",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --exclude tests/visual/**",
+    "test:watch": "vitest",
+    "test:visual": "playwright test tests/visual"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.32.0",
+    "fake-indexeddb": "^6.2.2",
+    "globals": "^16.3.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0",
+    "vite": "^7.1.1",
+    "vitest": "^3.2.4"
+  }
+}

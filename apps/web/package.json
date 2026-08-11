@@ -1,0 +1,1 @@
+{"name":"@sculpt/web","version":"0.2.0","description":"Browser editor and precision workspace UI for SCULPT.","license":"MIT","private":true,"type":"module","scripts":{"dev":"vite","build":"vite build","preview":"vite preview"},"dependencies":{"@sculpt/core":"*","@sculpt/workspace":"*","react":"^19.1.1","react-dom":"^19.1.1"}}

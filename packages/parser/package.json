@@ -1,0 +1,1 @@
+{"name":"@sculpt/parser","version":"0.2.0","description":"Diagram detection and parser contracts for SCULPT.","license":"MIT","type":"module","exports":"./src/index.ts","dependencies":{"@sculpt/ast":"*"}}

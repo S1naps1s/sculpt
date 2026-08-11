@@ -1,0 +1,1 @@
+{"name":"@sculpt/layout","version":"0.2.0","description":"Automatic and manual layout resolution for SCULPT.","license":"MIT","type":"module","exports":"./src/index.ts","dependencies":{"@dagrejs/dagre":"^1.1.5","@sculpt/ast":"*","@sculpt/workspace":"*"}}

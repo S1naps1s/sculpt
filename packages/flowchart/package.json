@@ -1,0 +1,1 @@
+{"name":"@sculpt/flowchart","version":"0.2.0","description":"Mermaid-compatible flowchart parser for SCULPT.","license":"MIT","type":"module","exports":"./src/index.ts","dependencies":{"@sculpt/ast":"*"}}

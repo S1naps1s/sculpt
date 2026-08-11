@@ -1,0 +1,1 @@
+{"name":"@sculpt/cli","version":"0.2.0","description":"Command-line entry point for SCULPT diagrams.","license":"MIT","type":"module","bin":{"sculpt":"src/index.ts"},"dependencies":{"@sculpt/core":"*"}}

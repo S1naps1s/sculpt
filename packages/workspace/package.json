@@ -1,0 +1,1 @@
+{"name":"@sculpt/workspace","version":"0.2.0","description":"Local workspace, persistence, and synchronization architecture for SCULPT.","license":"MIT","type":"module","exports":"./src/index.ts"}

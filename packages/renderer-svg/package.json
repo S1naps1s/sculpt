@@ -1,0 +1,1 @@
+{"name":"@sculpt/renderer-svg","version":"0.2.0","description":"Deterministic sanitized SVG renderer for SCULPT.","license":"MIT","type":"module","exports":"./src/index.ts","dependencies":{"@sculpt/ast":"*","@sculpt/layout":"*","@sculpt/themes":"*"}}
