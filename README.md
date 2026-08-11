@@ -24,6 +24,7 @@ SCULPT is an independent project and is not affiliated with or endorsed by Merma
 - Stable edge identities plus anchor, waypoint, and orthogonal-routing foundations
 - Selectable edges with anchor/routing controls and draggable manual waypoints
 - View-local undo/redo with transaction-grouped drag history
+- Initial Fit framing, a stable 100% base scale, and view-local 20%–800% zoom
 - Editor, preview, split, inspector, and presentation views
 - Same-browser multi-window workspace synchronization
 - Local IndexedDB workspace persistence
@@ -93,7 +94,7 @@ Diagram source and layout metadata are untrusted input. SCULPT does not execute 
 
 ## Project status
 
-Phases 1 and 2 establish the flowchart engine, live editor, local workspaces, multi-window views, and initial precision-layout tools. The project is early-stage. Advanced constrained hybrid layout, interactive waypoint editing, multi-selection alignment, additional diagram types, and cloud collaboration are not currently implemented.
+Phases 1–3 establish the flowchart engine, live editor, local workspaces, multi-window views, and the first precision editor. The project is early-stage. Advanced constrained hybrid layout, additional diagram types, and cloud collaboration are not currently implemented.
 
 ## License
 

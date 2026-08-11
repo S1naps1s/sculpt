@@ -16,6 +16,10 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Precision geometry operations belong in pure, browser-independent modules and require focused unit tests.
 - Editor overlays and hit targets must remain separate from exported SVG.
 - Drag and waypoint gestures produce one undo transaction, not one entry per pointer event.
+- Precision history owns only layout mode and node/edge geometry; undo applies that projection to the current document.
+- Capture one screen-to-diagram transform for a gesture and finalize transactions on pointer up, cancellation, or lost capture.
+- Route interpolation uses polyline arc length for labels and waypoint insertion.
+- At 100%, one diagram unit is one CSS pixel; Fit and manual zoom are view-local and never persisted.
 - Locked objects never move implicitly; position locking does not imply size locking.
 - DOM/screen coordinates are not diagram-space coordinates; transform through the SVG coordinate system.
 - Preserve deterministic rendering and support negative diagram-space coordinates in bounds.

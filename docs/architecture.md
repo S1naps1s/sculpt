@@ -58,6 +58,8 @@ Alignment uses the complete selection bounds: left/top use the minimum edge, rig
 
 Group translation applies one common delta to movable nodes. When snapping is enabled, the primary node determines the snapped group delta so relative spacing is preserved. Resizing sets `sizing: manual` without forcing auto-positioned nodes into manual positioning.
 
+Automatic sizing gives ordinary rectangle and rounded nodes a 120×64 minimum, expands width with label length, and gives database, diamond, stadium, and circle shapes modest additional room. Explicit positive manual width and height always override these defaults.
+
 ## Edge editing
 
 The interaction overlay provides non-visible wide edge hit strokes without changing exported appearance. The inspector edits anchors, auto/straight/orthogonal/manual routing, and routing locks. Adding a waypoint switches to manual routing. Selected waypoints are draggable and Delete removes them; locked routes reject changes. Orthogonal routes without explicit waypoints resolve through deterministic elbows. Orthogonal waypoint dragging chooses a valid corner from adjacent route segments, preventing diagonal segments.
@@ -66,10 +68,14 @@ Stored edge geometry is distinct from active routing interpretation. Auto uses t
 
 ## Undo and synchronization
 
-Each editing View owns a bounded `WorkspaceHistory`; history is not synchronized. Undo and redo restore workspace snapshots through the normal `WorkspaceController.update` path, so the resulting revision persists and broadcasts. Remote workspace events clear local history to prevent stale redo from overwriting newer shared state.
+Each editing View owns a bounded `WorkspaceHistory`; history is not synchronized. History entries project only layout mode plus node and edge geometry. Undo and redo apply that projection to the current Workspace through the normal `WorkspaceController.update` path, so later source, name, theme, grid configuration, timestamps, and unrelated future fields are preserved. Remote workspace events clear local history to prevent stale redo from overwriting newer shared state.
 
-Pointer-down begins a history transaction, pointer moves publish live workspace updates, and pointer-up commits one entry. No-op gestures are ignored. Numeric, alignment, distribution, sizing, anchor, routing, and waypoint commands create ordinary history entries. Source text keeps native textarea undo behavior; workspace shortcuts ignore text inputs.
+Pointer-down begins a history transaction. Node, group, waypoint, and marquee gestures capture the SVG screen-to-diagram inverse transform once and retain that coordinate frame even when live geometry changes the viewBox. Pointer up, pointer cancellation, and lost pointer capture use one idempotent finalizer: a changed drag commits one undoable entry, while a no-op gesture is ignored. Numeric, alignment, distribution, sizing, anchor, routing, and waypoint commands create ordinary history entries. Source text keeps native textarea undo behavior; workspace shortcuts ignore text inputs.
 
 ## Canvas bounds
 
 Resolved layout contains an explicit `x`, `y`, `width`, and `height`. Bounds include full node extents, routed edge points, waypoints, and padding, including negative coordinates. SVG uses these values directly as its viewBox rather than clipping geometry to a zero origin.
+
+The diagram surface is sized from those bounds, so 100% means approximately one diagram-space unit per CSS pixel. The generated SVG and interaction overlay fill the same surface and receive one view-local pan/zoom transform. Views initially use Fit mode, which centers a padded diagram and recalculates after canvas or diagram-size changes. Manual zoom, pan, drag, or the distinct 100% command exits Fit mode. Zoom is consistently clamped from 20% through 800%; viewport state is never persisted or synchronized.
+
+Route positions use polyline arc-length interpolation, including duplicate and zero-length segments. Rerouted edge labels and newly inserted waypoints use the halfway traveled distance, placing straight-edge waypoints in the interior and handling unequal multi-segment routes correctly.

@@ -91,6 +91,7 @@ export class WorkspaceController {
 export * from './precision';
 export * from './history';
 export * from './selection';
+export * from './viewport';
 
 export function parseWorkspaceLocation(location: Pick<Location, 'pathname' | 'search'>): { workspaceId: string; viewType: ViewType } {
   const match = /^\/workspace\/([^/]+)/.exec(location.pathname); const workspaceId = decodeURIComponent(match?.[1] ?? 'local'); const candidate = new URLSearchParams(location.search).get('view'); const types: ViewType[] = ['editor', 'preview', 'split', 'inspector', 'presentation']; return { workspaceId, viewType: types.includes(candidate as ViewType) ? candidate as ViewType : 'split' };
