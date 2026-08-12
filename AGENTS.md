@@ -8,6 +8,8 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Workspace and View are different concepts. Workspace state is shared and persistent; selection, zoom, pan, and cursor state are view-local.
 - Keep parser, AST, layout, renderer, persistence, synchronization, and UI separated.
 - The SVG renderer stays deterministic, sanitized, and framework-independent.
+- The Canvas owns workspace background and grid presentation; generated diagram SVG remains transparent and must not render editor or view backgrounds.
+- The visible Canvas grid and grid snapping share one diagram-space coordinate lattice; pan and zoom transform both consistently.
 - Local features must not introduce accounts, servers, databases, WebSockets, or cloud dependencies.
 - Avoid deprecated TypeScript options and keep TypeScript 7 compatibility in mind.
 - Treat source and layout metadata as untrusted. Validate finite numeric geometry before layout or rendering.
@@ -20,6 +22,14 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Capture one screen-to-diagram transform for a gesture and finalize transactions on pointer up, cancellation, or lost capture.
 - Route interpolation uses polyline arc length for labels and waypoint insertion.
 - At 100%, one diagram unit is one CSS pixel; Fit and manual zoom are view-local and never persisted.
+- Resize gestures preserve center-coordinate semantics and produce one precision-history transaction.
+- Smart-guide tolerance is screen-space; group snapping applies one common translation.
+- Grid and object snapping compete by smallest adjustment instead of being applied sequentially.
+- Resize snapping considers only the actively moving handle edges; locked selected nodes remain stationary snap references.
+- Direct waypoint insertion requires an actual edge hit and must respect the edge's active routing mode.
+- Editor guides, handles, and selection bounds never enter exported SVG.
+- Viewport commands, including Fit Selection, never modify Workspace geometry.
+- In editable Canvas views, generated SVG is visual-only; overlays own editing, and native browser selection or drag behavior must not participate in gestures.
 - Locked objects never move implicitly; position locking does not imply size locking.
 - DOM/screen coordinates are not diagram-space coordinates; transform through the SVG coordinate system.
 - Preserve deterministic rendering and support negative diagram-space coordinates in bounds.

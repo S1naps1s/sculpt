@@ -12,6 +12,9 @@ Mermaid-compatible source -> detection -> parser -> common AST
 
 Parsing remains unaware of geometry. `@sculpt/layout` first obtains automatic Dagre geometry, then resolves trusted, normalized workspace metadata over it. `@sculpt/renderer-svg` consumes only AST and resolved geometry and remains independent of React and browser storage.
 
+Generated SVG is transparent by default. The Canvas owns the application theme background and optional grid beneath the diagram, while editor overlays remain transparent and are excluded from exported SVG.
+The visible grid uses the same diagram-space origin and spacing as geometry snapping, so view-local pan, zoom, Fit, and Fit Selection transform the diagram and grid together.
+
 ## Workspace and View
 
 A Workspace is the shared local document: identity, source, theme, configuration, layout metadata, revision, and timestamps. A View identifies one browser window and its role (`editor`, `preview`, `split`, `inspector`, or `presentation`). Zoom, pan, selection, and editor focus remain view-local and are never persisted or broadcast as document changes.
@@ -79,3 +82,19 @@ Resolved layout contains an explicit `x`, `y`, `width`, and `height`. Bounds inc
 The diagram surface is sized from those bounds, so 100% means approximately one diagram-space unit per CSS pixel. The generated SVG and interaction overlay fill the same surface and receive one view-local pan/zoom transform. Views initially use Fit mode, which centers a padded diagram and recalculates after canvas or diagram-size changes. Manual zoom, pan, drag, or the distinct 100% command exits Fit mode. Zoom is consistently clamped from 20% through 800%; viewport state is never persisted or synchronized.
 
 Route positions use polyline arc-length interpolation, including duplicate and zero-length segments. Rerouted edge labels and newly inserted waypoints use the halfway traveled distance, placing straight-edge waypoints in the interior and handling unequal multi-segment routes correctly.
+
+## Advanced precision interaction
+
+Single-node selection exposes eight editor-only resize handles. Pure resize geometry moves the dragged edges while preserving the opposite edges and the center-coordinate convention; width and height clamp at 40×30 rather than flipping. A resize writes manual position and size metadata and shares the existing fixed coordinate frame and one-gesture/one-history-entry lifecycle, including cancellation and lost capture.
+
+Selection bounds are the union of full node rectangles, not centers. Multi-selection renders that union without adding group scaling. Handles, union bounds, guides, hit paths, and waypoints remain in the React interaction overlay and never enter deterministic exported SVG.
+
+In editable Canvas views the generated SVG is strictly visual: it does not receive pointer events, and native text selection and drag behavior are disabled within the canvas. Pointer-down and canvas focus clear stale DOM ranges so focus changes between windows cannot leak browser selection into an editing gesture. Source textareas and Inspector controls remain normally interactive, while Preview and Presentation keep the generated SVG available for future document interactions.
+
+Object snapping is a view-local preference independent of the persisted grid setting. Candidate geometry is captured at gesture start. Each axis compares selected/group bounds with target left, center, right, top, middle, and bottom features. Tolerance is six screen pixels converted by current zoom. Resolution sorts by smallest adjustment, then matching center/edge type, then stable semantic node ID. Group dragging applies one common resolved translation. When grid and object snapping are both enabled, the smaller per-axis adjustment wins; adjustments are never applied sequentially.
+
+Resize snapping has a separate solver: only the edge named by the active resize handle participates as the moving source, while target edges and centers remain available. Grid snapping likewise uses the moving edge coordinate, preventing stationary aligned edges or the changing node center from defeating an intended resize snap. For mixed locked selections, movement bounds include only movable nodes; selected locked nodes remain stationary snap references. A fully locked selection does not open a gesture transaction.
+
+Direct edge double-click requires an actual overlay edge hit, projects the pointer onto the nearest polyline segment, and inserts the waypoint at that route position. Manual routes preserve waypoint order. Directly editing Auto or Straight starts a fresh Manual route from the visible route, intentionally discarding inactive waypoint metadata; Orthogonal and Bézier direct insertion no-op. Projection and route ordering are pure geometry operations with stable segment-index tie breaking. Routing locks reject insertion, movement, deletion, and routing changes. Orthogonal waypoint movement retains horizontal/vertical elbows; Phase 4 deliberately does not introduce a full routing engine.
+
+Fit Selection reuses a pure viewport transform that calculates both scale and translation. Node selection uses the rectangle union; edge selection uses route-point bounds. The target center is translated relative to the complete diagram center, allowing negative and far-off-center selections to be framed. Fit Selection enters manual viewport mode and changes only local scale/pan; normal Fit, 100%, and the 20%–800% limits remain unchanged.
