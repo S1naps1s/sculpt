@@ -196,6 +196,8 @@ select:disabled {
 .canvas.grid {
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: var(--grid) var(--grid);
+  background-position: calc(50% + var(--grid-offset-x))
+    calc(50% + var(--grid-offset-y));
 }
 .canvas:focus-visible {
   box-shadow: inset 0 0 0 2px var(--accent);

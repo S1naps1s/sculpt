@@ -13,6 +13,7 @@ Mermaid-compatible source -> detection -> parser -> common AST
 Parsing remains unaware of geometry. `@sculpt/layout` first obtains automatic Dagre geometry, then resolves trusted, normalized workspace metadata over it. `@sculpt/renderer-svg` consumes only AST and resolved geometry and remains independent of React and browser storage.
 
 Generated SVG is transparent by default. The Canvas owns the application theme background and optional grid beneath the diagram, while editor overlays remain transparent and are excluded from exported SVG.
+The visible grid uses the same diagram-space origin and spacing as geometry snapping, so view-local pan, zoom, Fit, and Fit Selection transform the diagram and grid together.
 
 ## Workspace and View
 

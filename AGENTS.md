@@ -9,6 +9,7 @@ SCULPT means **Schematic Composition with User-Controlled Layout & Precision Top
 - Keep parser, AST, layout, renderer, persistence, synchronization, and UI separated.
 - The SVG renderer stays deterministic, sanitized, and framework-independent.
 - The Canvas owns workspace background and grid presentation; generated diagram SVG remains transparent and must not render editor or view backgrounds.
+- The visible Canvas grid and grid snapping share one diagram-space coordinate lattice; pan and zoom transform both consistently.
 - Local features must not introduce accounts, servers, databases, WebSockets, or cloud dependencies.
 - Avoid deprecated TypeScript options and keep TypeScript 7 compatibility in mind.
 - Treat source and layout metadata as untrusted. Validate finite numeric geometry before layout or rendering.
