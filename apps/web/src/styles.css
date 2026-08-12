@@ -191,6 +191,7 @@ select:disabled {
   touch-action: none;
   cursor: default;
   outline: none;
+  background-color: var(--bg);
 }
 .canvas.grid {
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
@@ -224,8 +225,6 @@ select:disabled {
 }
 .diagram-output svg {
   display: block;
-  box-shadow: 0 18px 60px #0004;
-  border-radius: 8px;
 }
 .interaction-overlay {
   position: absolute;

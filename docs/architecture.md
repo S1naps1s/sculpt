@@ -12,6 +12,8 @@ Mermaid-compatible source -> detection -> parser -> common AST
 
 Parsing remains unaware of geometry. `@sculpt/layout` first obtains automatic Dagre geometry, then resolves trusted, normalized workspace metadata over it. `@sculpt/renderer-svg` consumes only AST and resolved geometry and remains independent of React and browser storage.
 
+Generated SVG is transparent by default. The Canvas owns the application theme background and optional grid beneath the diagram, while editor overlays remain transparent and are excluded from exported SVG.
+
 ## Workspace and View
 
 A Workspace is the shared local document: identity, source, theme, configuration, layout metadata, revision, and timestamps. A View identifies one browser window and its role (`editor`, `preview`, `split`, `inspector`, or `presentation`). Zoom, pan, selection, and editor focus remain view-local and are never persisted or broadcast as document changes.
